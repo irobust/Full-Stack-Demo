@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "733a2a65-b4da-40a2-a478-914e25fd39c8",
+		"name": "Posts Demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7314361"
+	},
+	"item": [
+		{
+			"name": "New Post",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const lodash = require('lodash');\r",
+							"const userId = lodash.random(1, 10);\r",
+							"\r",
+							"const statuses = ['available', 'pending', 'sold'];\r",
+							"\r",
+							"pm.variables.set(\"UserId\", userId)\r",
+							"pm.variables.set(\"Status\", lodash.sample(statuses))"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const post = pm.response.json();\r",
+							"pm.globals.set(\"objectId\", post._id);\r",
+							"const counter = +pm.globals.get(\"couter\");\r",
+							"console.log(counter);\r",
+							"\r",
+							"pm.test(\"post should be inserted\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"New post shold has _id\", function () {\r",
+							"    pm.expect(post._id).exist;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": {{UserId}},\r\n    \"title\": \"Test from postman\",\r\n    \"body\": \"{{$randomLoremSentence}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BaseURL}}/v2/posts",
+					"host": [
+						"{{BaseURL}}"
+					],
+					"path": [
+						"v2",
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const post = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    // pm.expect(pm.response.status).to.be.oneOf([200, 201]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Post should be exist\", function () {\r",
+							"    pm.expect(post._id).exist;\r",
+							"    pm.expect(post.userId).is.not.null;\r",
+							"    pm.expect(post.title).is.string;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BaseURL}}/v2/posts/{{objectId}}",
+					"host": [
+						"{{BaseURL}}"
+					],
+					"path": [
+						"v2",
+						"posts",
+						"{{objectId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
